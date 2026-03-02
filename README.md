@@ -251,7 +251,7 @@ docker compose down
 **Environment variables:**
 - `MCP_HOST`: host to bind to (defaults to `0.0.0.0`). Set to `127.0.0.1` for local development to follow MCP security best practices.
 - `MCP_PORT`: port for the MCP HTTP server (defaults to `8000` when unset).
-- `MCP_ENV`: environment name reported to Sentry (defaults to `prod`). Set to `preprod`, `demo`, or `local` as appropriate.
+- `MCP_ENV`: environment name reported to Sentry (defaults to `local` when unset). Set explicitly to `prod`, `preprod`, or `demo` in your deployment.
 - `DATAGOUV_API_ENV`: `prod` (default) or `demo`. This controls which data.gouv.fr environement it uses the data from (https://www.data.gouv.fr or https://demo.data.gouv.fr). By default the MCP server talks to the production data.gouv.fr. Set `DATAGOUV_API_ENV=demo` if you specifically need the demo environment.
 - `SENTRY_DSN`: Sentry DSN to enable error and performance monitoring. Monitoring is disabled when unset.
 - `SENTRY_SAMPLE_RATE`: sampling rate for Sentry traces and profiles (float `0.0`–`1.0`, defaults to `1.0`).
@@ -276,7 +276,7 @@ You will need [uv](https://github.com/astral-sh/uv) to install dependencies and 
   ```
   MCP_HOST=127.0.0.1  # (defaults to 0.0.0.0, use 127.0.0.1 for local dev)
   MCP_PORT=8007  # (defaults to 8000 when unset)
-  MCP_ENV=local  # environment name sent to Sentry (defaults to prod when unset)
+  MCP_ENV=local  # environment name sent to Sentry (defaults to local when unset)
   DATAGOUV_API_ENV=prod  # Allowed values: demo | prod (defaults to prod when unset)
   ```
 
