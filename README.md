@@ -119,56 +119,6 @@ Add the following to your `~/.gemini/settings.json` file:
 3. **Configure the Server:** Enter a **Server Name** (e.g., "Data Gouv") and set the **Server URL** to `https://mcp.data.gouv.fr/mcp`. Click `Add Server` to save.
 4. **Verify Connection:** Click the `Health Check` button on the new server card to confirm it displays as **Connected**. Ensure the toggle is activated to use the tools in your chat.
 
-### Le Chat (Mistral)
-
-*Available on all plans, including free.*
-
-1. **Go to Connectors**: Open Mistral in your browser, then go to `Intelligence` > `Connectors`.
-2. **Add a custom connector**: Click `Add connector` > `Custom MCP Connector`, give it a name (for example `DataGouv`), and set the server URL to `https://mcp.data.gouv.fr/mcp`.
-3. **No authentication**: Leave authentication disabled.
-4. **Create**: Click **Create**.
-
-### Mistral Vibe CLI
-
-Edit your Vibe config (default `~/.vibe/config.toml`) and add the MCP server:
-
-```toml
-[[mcp_servers]]
-name = "datagouv"
-transport = "streamable-http"
-url = "https://mcp.data.gouv.fr/mcp"
-```
-
-See the full Vibe MCP options in the official docs: [MCP server configuration](https://github.com/mistralai/mistral-vibe?tab=readme-ov-file#mcp-server-configuration).
-
-### Kiro IDE
-
-Add the following to your Kiro MCP configuration file (`.kiro/settings/mcp.json` in your workspace, or `~/.kiro/settings/mcp.json` for global config):
-
-```json
-{
-  "mcpServers": {
-    "datagouv": {
-      "url": "https://mcp.data.gouv.fr/mcp"
-    }
-  }
-}
-```
-
-### Kiro CLI
-
-Add the following to `~/.kiro/settings/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "datagouv": {
-      "url": "https://mcp.data.gouv.fr/mcp"
-    }
-  }
-}
-```
-
 ### IBM Bob
 
 IBM Bob supports MCP servers through its settings. To configure the server:
@@ -191,6 +141,56 @@ Both files use JSON format with an mcpServers object containing named server con
   }
 }
 ```
+
+### Kiro CLI
+
+Add the following to `~/.kiro/settings/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "datagouv": {
+      "url": "https://mcp.data.gouv.fr/mcp"
+    }
+  }
+}
+```
+
+### Kiro IDE
+
+Add the following to your Kiro MCP configuration file (`.kiro/settings/mcp.json` in your workspace, or `~/.kiro/settings/mcp.json` for global config):
+
+```json
+{
+  "mcpServers": {
+    "datagouv": {
+      "url": "https://mcp.data.gouv.fr/mcp"
+    }
+  }
+}
+```
+
+### Le Chat (Mistral)
+
+*Available on all plans, including free.*
+
+1. **Go to Connectors**: Open Mistral in your browser, then go to `Intelligence` > `Connectors`.
+2. **Add a custom connector**: Click `Add connector` > `Custom MCP Connector`, give it a name (for example `DataGouv`), and set the server URL to `https://mcp.data.gouv.fr/mcp`.
+3. **No authentication**: Leave authentication disabled.
+4. **Create**: Click **Create**.
+
+### Mistral Vibe CLI
+
+Edit your Vibe config (default `~/.vibe/config.toml`) and add the MCP server:
+
+```toml
+[[mcp_servers]]
+name = "datagouv"
+transport = "streamable-http"
+url = "https://mcp.data.gouv.fr/mcp"
+```
+
+See the full Vibe MCP options in the official docs: [MCP server configuration](https://github.com/mistralai/mistral-vibe?tab=readme-ov-file#mcp-server-configuration).
 
 ### VS Code
 
