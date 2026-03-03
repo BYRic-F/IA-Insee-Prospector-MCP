@@ -1,3 +1,5 @@
 """User-Agent sent to data.gouv.fr services for identification and support."""
 
-USER_AGENT = "datagouv-mcp"
+from importlib.metadata import version
+
+USER_AGENT = f"datagouv-mcp/{version('datagouv-mcp')}"
