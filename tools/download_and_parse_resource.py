@@ -1,6 +1,7 @@
 import csv
 import gzip
 import io
+import itertools
 import json
 import logging
 from typing import Any
@@ -12,24 +13,29 @@ from helpers import datagouv_api_client
 
 logger = logging.getLogger("datagouv_mcp")
 
+MAX_DOWNLOAD_SIZE_MB: int = 50
+MAX_ROWS_HARD_LIMIT: int = 500
+
 
 def register_download_and_parse_resource_tool(mcp: FastMCP) -> None:
     @mcp.tool()
     async def download_and_parse_resource(
         resource_id: str,
         max_rows: int = 20,
-        max_size_mb: int = 500,
     ) -> str:
         """
         Download and parse a resource directly (bypasses Tabular API).
 
-        Use for JSON/JSONL files, or when full dataset analysis is needed.
+        Use for JSON/JSONL files only. For CSV/XLSX, prefer query_resource_data
+        (no download needed, supports pagination and filtering).
         Supports CSV, CSV.GZ, JSON, JSONL.
 
-        Strategy: Start with default max_rows (20) to preview structure and size.
-        If you need all data, call again with a higher max_rows value.
-        For CSV/XLSX preview, prefer query_resource_data (faster).
+        Strategy: Start with default max_rows (20) to preview structure.
+        Increase max_rows up to 500 for a broader sample.
+        Files larger than 50 MB are rejected.
         """
+        max_rows = min(max(max_rows, 1), MAX_ROWS_HARD_LIMIT)
+
         try:
             # Get full resource data to find URL and metadata
             resource_data = await datagouv_api_client.get_resource_details(resource_id)
@@ -52,7 +58,7 @@ def register_download_and_parse_resource_tool(mcp: FastMCP) -> None:
 
             # Download the file
             try:
-                max_size = max_size_mb * 1024 * 1024
+                max_size = MAX_DOWNLOAD_SIZE_MB * 1024 * 1024
                 content, filename, content_type = await _download_resource(
                     resource_url, max_size
                 )
@@ -87,10 +93,14 @@ def register_download_and_parse_resource_tool(mcp: FastMCP) -> None:
                     file_format == "gzip" and "csv" in filename.lower()
                 ):
                     content_parts.append("Format: CSV")
-                    rows = _parse_csv(content, is_gzipped=bool(is_gzipped))
+                    rows = _parse_csv(
+                        content, is_gzipped=bool(is_gzipped), max_rows=max_rows
+                    )
                 elif file_format == "json" or file_format == "jsonl":
                     content_parts.append("Format: JSON/JSONL")
-                    rows = _parse_json(content, is_gzipped=bool(is_gzipped))
+                    rows = _parse_json(
+                        content, is_gzipped=bool(is_gzipped), max_rows=max_rows
+                    )
                 elif file_format == "xlsx":
                     content_parts.append("Format: XLSX")
                     content_parts.append(
@@ -122,25 +132,22 @@ def register_download_and_parse_resource_tool(mcp: FastMCP) -> None:
                 content_parts.append("⚠️  No data rows found in file.")
                 return "\n".join(content_parts)
 
-            # Limit rows
             total_rows = len(rows)
-            rows = rows[:max_rows]
 
             content_parts.append("")
-            content_parts.append(f"Total rows in file: {total_rows}")
-            content_parts.append(f"Returning: {len(rows)} row(s)")
+            content_parts.append(f"Total rows parsed (up to limit): {total_rows}")
+            content_parts.append(f"Returning: {total_rows} row(s)")
 
             # Show column names
             if rows:
                 columns = [str(k) if k is not None else "" for k in rows[0].keys()]
                 content_parts.append(f"Columns: {', '.join(columns)}")
 
-            # Show all parsed data (up to max_rows)
             content_parts.append("")
-            if len(rows) == 1:
+            if total_rows == 1:
                 content_parts.append("Data (1 row):")
             else:
-                content_parts.append(f"Data ({len(rows)} rows):")
+                content_parts.append(f"Data ({total_rows} rows):")
             for i, row in enumerate(rows, 1):
                 content_parts.append(f"  Row {i}:")
                 for key, value in row.items():
@@ -149,12 +156,11 @@ def register_download_and_parse_resource_tool(mcp: FastMCP) -> None:
                         val_str = val_str[:100] + "..."
                     content_parts.append(f"    {key}: {val_str}")
 
-            if total_rows > max_rows:
+            if total_rows == MAX_ROWS_HARD_LIMIT:
                 content_parts.append("")
                 content_parts.append(
-                    f"⚠️  Note: File contains {total_rows} rows, "
-                    f"only showing first {max_rows}. "
-                    "Increase max_rows parameter to see more."
+                    f"⚠️  Row limit reached ({MAX_ROWS_HARD_LIMIT}). "
+                    "The file may contain more rows."
                 )
 
             return "\n".join(content_parts)
@@ -167,7 +173,7 @@ def register_download_and_parse_resource_tool(mcp: FastMCP) -> None:
 
 
 async def _download_resource(
-    resource_url: str, max_size: int = 500 * 1024 * 1024
+    resource_url: str, max_size: int = MAX_DOWNLOAD_SIZE_MB * 1024 * 1024
 ) -> tuple[bytes, str, str | None]:
     """
     Download a resource with size limit.
@@ -189,14 +195,16 @@ async def _download_resource(
                     f"(max: {max_size / (1024 * 1024):.1f} MB)"
                 )
 
-        # Download with size limit
-        content = bytearray()
-        async for chunk in resp.aiter_bytes(chunk_size=8192):
-            content.extend(chunk)
-            if len(content) > max_size:
+        # Accumulate chunks then join once (avoids bytearray → bytes double-copy)
+        chunks: list[bytes] = []
+        total = 0
+        async for chunk in resp.aiter_bytes(chunk_size=65536):
+            total += len(chunk)
+            if total > max_size:
                 raise ValueError(
                     f"File too large: exceeds {max_size / (1024 * 1024):.1f} MB limit"
                 )
+            chunks.append(chunk)
 
         # Get filename from Content-Disposition or URL
         filename = "resource"
@@ -208,7 +216,7 @@ async def _download_resource(
 
         content_type = resp.headers.get("Content-Type", "").split(";")[0]
 
-        return bytes(content), filename, content_type
+        return b"".join(chunks), filename, content_type
 
 
 def _detect_file_format(filename: str, content_type: str | None) -> str:
@@ -251,8 +259,10 @@ def _detect_file_format(filename: str, content_type: str | None) -> str:
     return "unknown"
 
 
-def _parse_csv(content: bytes, is_gzipped: bool = False) -> list[dict[str, Any]]:
-    """Parse CSV content with automatic delimiter detection."""
+def _parse_csv(
+    content: bytes, is_gzipped: bool = False, max_rows: int = MAX_ROWS_HARD_LIMIT
+) -> list[dict[str, Any]]:
+    """Parse CSV content with automatic delimiter detection, stopping at max_rows."""
     if is_gzipped:
         content = gzip.decompress(content)
 
@@ -283,11 +293,13 @@ def _parse_csv(content: bytes, is_gzipped: bool = False) -> list[dict[str, Any]]
                 delimiter = best_delimiter[0]
 
     reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
-    return list(reader)
+    return list(itertools.islice(reader, max_rows))
 
 
-def _parse_json(content: bytes, is_gzipped: bool = False) -> list[dict[str, Any]]:
-    """Parse JSON content (array or JSONL)."""
+def _parse_json(
+    content: bytes, is_gzipped: bool = False, max_rows: int = MAX_ROWS_HARD_LIMIT
+) -> list[dict[str, Any]]:
+    """Parse JSON content (array or JSONL), stopping at max_rows."""
     if is_gzipped:
         content = gzip.decompress(content)
 
@@ -297,17 +309,17 @@ def _parse_json(content: bytes, is_gzipped: bool = False) -> list[dict[str, Any]
     try:
         data = json.loads(text)
         if isinstance(data, list):
-            return data
+            return data[:max_rows]
         if isinstance(data, dict):
-            # Single object, return as list
             return [data]
     except json.JSONDecodeError:
         pass
 
-    # Try JSONL (one JSON object per line)
-    lines = text.strip().split("\n")
+    # Try JSONL (one JSON object per line) — stop early at max_rows
     result = []
-    for line in lines:
+    for line in text.strip().split("\n"):
+        if len(result) >= max_rows:
+            break
         if line.strip():
             try:
                 result.append(json.loads(line))
