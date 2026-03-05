@@ -16,7 +16,6 @@ from helpers.sentry import init_sentry
 from tools import register_tools
 
 init_sentry()
-
 # Configure logging
 LOGGER_NAME = "datagouv_mcp"
 
@@ -37,6 +36,7 @@ transport_security = TransportSecuritySettings(
         "mcp.preprod.data.gouv.fr",
         "localhost",
         "127.0.0.1",
+        "127.0.0.1:8000"
     ],
     # Validate Origin header to prevent DNS rebinding attacks (MCP spec requirement)
     allowed_origins=[
