@@ -25,8 +25,8 @@ The MCP server configuration depends on your client. Use the appropriate configu
 ### AnythingLLM
 
 1. Locate the `anythingllm_mcp_servers.json` file in your AnythingLLM storage plugins directory:
-   - **Mac**: `~/Library/Application Support/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json`
    - **Linux**: `~/.config/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json`
+   - **MacOS**: `~/Library/Application Support/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json`
    - **Windows**: `C:\Users\<username>\AppData\Roaming\anythingllm-desktop\storage\plugins\anythingllm_mcp_servers.json`
 
 2. Add the following configuration:
@@ -63,7 +63,7 @@ claude mcp add --transport http datagouv https://mcp.data.gouv.fr/mcp
 
 ### Claude Desktop
 
-Add the following to your Claude Desktop configuration file (typically `~/Library/Application Support/Claude/claude_desktop_config.json` on MacOS, or `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
+Add the following to your Claude Desktop configuration file (typically `~/.config/Claude/claude_desktop_config.json` on Linux, `~/Library/Application Support/Claude/claude_desktop_config.json` on MacOS, or `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
 
 ```json
 {
@@ -100,7 +100,7 @@ Cursor supports MCP servers through its settings. To configure the server:
 
 ### Gemini CLI
 
-Add the following to your `~/.gemini/settings.json` file:
+Add the following to your `~/.gemini/settings.json` file (Linux: `~/.gemini/settings.json`, MacOS: `~/.gemini/settings.json`, Windows: `%USERPROFILE%\.gemini\settings.json`):
 
 ```json
 {
@@ -144,7 +144,7 @@ Both files use JSON format with an mcpServers object containing named server con
 
 ### Kiro CLI
 
-Add the following to `~/.kiro/settings/mcp.json`:
+Add the following to `~/.kiro/settings/mcp.json` (Linux: `~/.kiro/settings/mcp.json`, MacOS: `~/.kiro/settings/mcp.json`, Windows: `%USERPROFILE%\.kiro\settings\mcp.json`):
 
 ```json
 {
@@ -158,7 +158,7 @@ Add the following to `~/.kiro/settings/mcp.json`:
 
 ### Kiro IDE
 
-Add the following to your Kiro MCP configuration file (`.kiro/settings/mcp.json` in your workspace, or `~/.kiro/settings/mcp.json` for global config):
+Add the following to your Kiro MCP configuration file (`.kiro/settings/mcp.json` in your workspace, or for global config: Linux: `~/.kiro/settings/mcp.json`, MacOS: `~/.kiro/settings/mcp.json`, Windows: `%USERPROFILE%\.kiro\settings\mcp.json`):
 
 ```json
 {
@@ -181,7 +181,7 @@ Add the following to your Kiro MCP configuration file (`.kiro/settings/mcp.json`
 
 ### Mistral Vibe CLI
 
-Edit your Vibe config (default `~/.vibe/config.toml`) and add the MCP server:
+Edit your Vibe config (default: Linux: `~/.vibe/config.toml`, MacOS: `~/.vibe/config.toml`, Windows: `%USERPROFILE%\.vibe\config.toml`) and add the MCP server:
 
 ```toml
 [[mcp_servers]]
@@ -194,7 +194,7 @@ See the full Vibe MCP options in the official docs: [MCP server configuration](h
 
 ### VS Code
 
-Add the following to your VS Code `settings.json`:
+Add the following to your VS Code `mcp.json` file (Linux: `~/.config/Code/User/mcp.json`, MacOS: `~/Library/Application Support/Code/User/mcp.json`, Windows: `%APPDATA%\Code\User\mcp.json`). Run **MCP: Open User Configuration** from the Command Palette to open it.
 
 ```json
 {
@@ -209,7 +209,7 @@ Add the following to your VS Code `settings.json`:
 
 ### Windsurf
 
-Add the following to your `~/.codeium/mcp_config.json`:
+Add the following to your `~/.codeium/windsurf/mcp_config.json` (Linux: `~/.codeium/windsurf/mcp_config.json`, MacOS: `~/.codeium/windsurf/mcp_config.json`, Windows: `%USERPROFILE%\.codeium\windsurf\mcp_config.json`):
 
 ```json
 {
@@ -344,13 +344,7 @@ The MCP server provides tools to interact with data.gouv.fr datasets and dataser
 
   Parameters: `question` (required), `resource_id` (required), `page` (optional, default: 1), `page_size` (optional, default: 20, max: 200)
 
-  Note: Recommended workflow: 1) Use `search_datasets` to find the dataset, 2) Use `list_dataset_resources` to see available resources, 3) Use `query_resource_data` with default `page_size` (20) to preview data structure. For small datasets (<500 rows), increase `page_size` or paginate. For large datasets (>1000 rows), use `download_and_parse_resource` instead. Works for CSV/XLS resources within Tabular API size limits (CSV ≤ 100 MB, XLSX ≤ 12.5 MB).
-
-- **`download_and_parse_resource`** - Download and parse a resource that is not accessible via Tabular API (files too large, formats not supported, external URLs).
-
-  Parameters: `resource_id` (required), `max_rows` (optional, default: 20), `max_size_mb` (optional, default: 500)
-
-  Supported formats: CSV, CSV.GZ, JSON, JSONL. Useful for files exceeding Tabular API limits or formats not supported by Tabular API. Start with default max_rows (20) to preview, then call again with higher max_rows if you need all data.
+  Note: Recommended workflow: 1) Use `search_datasets` to find the dataset, 2) Use `list_dataset_resources` to see available resources, 3) Use `query_resource_data` with default `page_size` (20) to preview data structure. For small datasets (<500 rows), increase `page_size` or paginate. For large datasets (>1000 rows), continue paginating or use `get_resource_info` to retrieve the raw file URL and fetch it directly. Works for CSV/XLS resources within Tabular API size limits (CSV ≤ 100 MB, XLSX ≤ 12.5 MB).
 
 ### Dataservices (external APIs)
 

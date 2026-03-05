@@ -1,5 +1,58 @@
 # Changelog
 
+## 0.2.20 (2026-03-04)
+
+- feat: better health check ([#64](https://github.com/datagouv/datagouv-mcp/pull/64))
+- feat: remove download_and_parse_resource tool ([#66](https://github.com/datagouv/datagouv-mcp/pull/66))
+
+
+## 0.2.19 (2026-03-04)
+
+- docs: add TODO
+- docs: improve README for instructions about chatbots
+- feat: include version in user-agent
+- feat: mcp sends a specific user agent to datagouv service
+- fix: allow localhost with port in allowed_hosts for local MCP clients
+- fix: fix wrong max value
+- fix: remove slicing in _parse_json response
+- fix(download): harden RAM limits in download_and_parse_resource
+- tests: test user-agent
+
+
+## 0.2.18 (2026-03-03)
+
+- docs: update README with IBM Bob server type from 'http' to 'streamable-http'
+- chore: remove unused import in list_dataset_resources
+- clean: remove non-IDE-agnostic skills
+- docs: add kiro IDE instructions
+- docs: add Mistral instructions to README
+- docs: fix minor issue in ordering
+- docs: fix minor issue in ordering in README
+- docs: fix minor ordering issue in README
+- docs: fix minor README indentation typo
+- docs: fix typo
+- docs: improve contributing guidelines in README
+- docs: improve README
+- docs: minor README indentation fix
+- docs: reorder env vars to keep LOG_LEVEL last
+- docs: update README.md
+- docs: enhance README with image cover
+- feat: add LOG_LEVEL support in main logging config
+- feat(monitoring): add Sentry error and performance tracking
+- fix: address review feedback for LOG_LEVEL
+- fix: align docker-compose env with DATAGOUV_ENV
+- fix: enable stateless HTTP to fix "Session not found" for most MCP clients
+- fix: normalize env var name
+- fix: normalize env var names
+- fix: Remove 'transport' field for the Gemini CLI configuration
+- fix: safer default for MCP_ENV
+- fix: use /health for docker compose healthcheck
+- fix: validate filter and sort options in query_resource_data
+- perf: remove N+1 calls in list_dataset_resources
+- perf: use bytearray buffering in resource downloader
+- refactor: rename DATAGOUV_ENV to DATAGOUV_API_ENV
+- docs: update README with HuggingChat server setup instructions
+- docs: update README with IBM Bob MCP configuration details
 ## 0.2.17 (2026-02-26)
 
 - docs: reformat ChatGPT section
