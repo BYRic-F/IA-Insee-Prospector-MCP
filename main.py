@@ -8,12 +8,16 @@ from importlib.metadata import PackageNotFoundError, version
 from typing import Awaitable, Callable
 
 import uvicorn
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
 from helpers.matomo import track_matomo
 from helpers.sentry import init_sentry
 from tools import register_tools
+
+# Load environment variables from .env file
+load_dotenv()
 
 init_sentry()
 
